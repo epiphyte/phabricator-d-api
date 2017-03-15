@@ -17,7 +17,8 @@ test: unittest style
 
 unittest:
 	dmd $(SRC) "test/harness.d" -unittest -version=PhabUnitTest -of$(OUTPUT)/${NAME}
-	./$(OUTPUT)/$(NAME)
+	./$(OUTPUT)/$(NAME) > $(OUTPUT)/test.log
+	diff -u $(OUTPUT)/test.log test/expected.log
 
 style:
 ifdef STYLE

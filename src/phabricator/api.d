@@ -79,6 +79,56 @@ public class DashboardAPI : PhabricatorAPI
     }
 }
 
+///
+version(PhabUnitTest)
+{
+    /**
+     * Testing API
+     */
+    public class TestAPI : PhabricatorAPI
+    {
+        /**
+         * Cause an error
+         */
+        public JSONValue error()
+        {
+            return this.request(HTTP.Method.post,
+                                Category.dashboard,
+                                "error",
+                                null);
+        }
+
+        /**
+         * Get test data
+         */
+        public JSONValue get()
+        {
+            return this.request(HTTP.Method.post,
+                                Category.dashboard,
+                                "test",
+                                null);
+        }
+    }
+
+    unittest
+    {
+        auto api = new TestAPI();
+        api.url = "url";
+        api.token = "token";
+        auto resp = api.get();
+        assert(resp.toJSON() == "{}");
+        try
+        {
+            api.error();
+            assert(false);
+        }
+        catch (PhabricatorAPIException e)
+        {
+            assert(e.msg == "Response error");
+        }
+    }
+}
+
 /**
  * API categories
  */
@@ -142,7 +192,7 @@ public abstract class PhabricatorAPI
 
             auto endpoint = this.url ~ "/api/" ~ cat ~ "." ~ call;
             bool curl = true;
-            version(MatrixUnitTest)
+            version(PhabUnitTest)
             {
                 curl = false;
                 import std.file: readText;
@@ -169,7 +219,17 @@ public abstract class PhabricatorAPI
             }
 
             re.data["api.token"] = this.token;
-            val = cast(string)post(endpoint, re.data, client);
+            if (curl)
+            {
+                val = cast(string)post(endpoint, re.data, client);
+            }
+
+            version(PhabUnitTest)
+            {
+                import std.stdio;
+                writeln(re.data);
+            }
+
             auto json = parseJSON(val);
             if (ErrorCode in json)
             {

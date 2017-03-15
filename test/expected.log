@@ -1,0 +1,4 @@
+url/api/dashboard.test
+["api.token":"token"]
+url/api/dashboard.error
+["api.token":"token"]
