@@ -7,7 +7,7 @@ module phabricator.api;
 import core.time;
 import std.json;
 import std.net.curl;
-import std.string: startsWith;
+import std.string: startsWith, toUpper;
 import std.uri;
 
 // error code key
@@ -112,11 +112,12 @@ public class DiffusionAPI : PhabricatorAPI
                                              string branch)
     {
         string useCall = callsign;
-        if (!callsign.startsWith("r"))
+        if (callsign.startsWith("r"))
         {
-            useCall = "r" ~ callsign;
+            useCall = callsign[1..callsign.length];
         }
 
+        useCall = "r" ~ useCall.toUpper();
         auto req = DataRequest();
         req.data["path"] = path;
         req.data["callsign"] = useCall;

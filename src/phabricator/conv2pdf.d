@@ -55,8 +55,8 @@ public static bool convertDiffusion(Settings settings,
         auto diff = construct!DiffusionAPI(settings);
         auto cnt = diff.fileContentByPathBranch(path, callsign, branch);
         auto file = construct!FileAPI(settings);
-        auto download = file.download(cnt["filePHID"].str);
-        ubyte[] bytes = Base64.decode(download.str);
+        auto download = file.download(cnt[ResultKey]["filePHID"].str);
+        ubyte[] bytes = Base64.decode(download[ResultKey].str);
         auto text = cast(string)bytes;
         return convert(text, output);
     }
