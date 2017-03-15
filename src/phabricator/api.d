@@ -146,10 +146,18 @@ public class ManiphestAPI : PhabricatorAPI
     {
         auto req = DataRequest();
         req.data["queryKey"] = "open";
+        return this.getData("search", &req);
+    }
+
+    /**
+     * Get data
+     */
+    private JSONValue getData(string call, DataRequest* req)
+    {
         return this.paged(HTTP.Method.post,
                           Category.maniphest,
-                          "search",
-                          &req,
+                          call,
+                          req,
                           &tasks);
     }
 }
