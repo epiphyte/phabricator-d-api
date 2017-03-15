@@ -21,6 +21,15 @@ public enum CursorKey = "cursor";
 // after key
 public enum AfterKey = "after";
 
+// Custom fields
+private enum CustomField = "custom.custom:";
+
+// Index field
+public enum IndexField = CustomField ~ "index";
+
+// fields key
+public enum FieldsKey = "fields";
+
 /**
  * Settings to construct apis from
  */

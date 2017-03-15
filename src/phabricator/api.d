@@ -105,6 +105,12 @@ public class FileAPI : PhabricatorAPI
  */
 public class ManiphestAPI : PhabricatorAPI
 {
+    // All tasks
+    private enum AllQuery = "all";
+
+    // Open tasks
+    private enum OpenQuery = "open";
+
     /**
      * Compile a set of task results into a single output
      */
@@ -144,8 +150,24 @@ public class ManiphestAPI : PhabricatorAPI
      */
     public JSONValue open()
     {
+        return this.byQueryKey(OpenQuery);
+    }
+
+    /**
+     * All tasks
+     */
+    public JSONValue all()
+    {
+        return this.byQueryKey(AllQuery);
+    }
+
+    /**
+     * Get by query key
+     */
+    private JSONValue byQueryKey(string key)
+    {
         auto req = DataRequest();
-        req.data["queryKey"] = "open";
+        req.data["queryKey"] = key;
         return this.getData("search", &req);
     }
 
