@@ -5,6 +5,7 @@
  */
 module phabricator.api;
 import core.time;
+import phabricator.common;
 import std.json;
 import std.net.curl;
 import std.string: startsWith, toUpper;
@@ -100,6 +101,60 @@ public class FileAPI : PhabricatorAPI
 }
 
 /**
+ * Maniphest API for tasks
+ */
+public class ManiphestAPI : PhabricatorAPI
+{
+    /**
+     * Compile a set of task results into a single output
+     */
+    private static JSONValue tasks(JSONValue[] results)
+    {
+        JSONValue stitched = JSONValue();
+        stitched[ResultKey] = JSONValue();
+        stitched[ResultKey][DataKey] = JSONValue();
+        stitched[ResultKey][DataKey].array = [];
+        foreach (obj; results)
+        {
+            foreach (key; obj.object.keys)
+            {
+                if (key == ResultKey)
+                {
+                    auto sub = obj.object[key];
+                    foreach (subkey; sub.object.keys)
+                    {
+                        if (subkey == DataKey)
+                        {
+                            auto data = sub.object[subkey];
+                            foreach (o; data.array)
+                            {
+                                stitched[ResultKey][DataKey].array ~= o;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return stitched;
+    }
+
+    /**
+     * Open tasks
+     */
+    public JSONValue open()
+    {
+        auto req = DataRequest();
+        req.data["queryKey"] = "open";
+        return this.paged(HTTP.Method.post,
+                          Category.maniphest,
+                          "search",
+                          &req,
+                          &tasks);
+    }
+}
+
+/**
  * Diffusion api
  */
 public class DiffusionAPI : PhabricatorAPI
@@ -179,6 +234,9 @@ version(PhabUnitTest)
     }
 }
 
+// Provides stitching of result sets together
+alias JSONValue function(JSONValue[]) StitchFunction;
+
 /**
  * API categories
  */
@@ -186,7 +244,8 @@ public enum Category : string
 {
     // categories of the API methods
     phriction = "phriction", dashboard = "dashboard",
-        diffusion = "diffusion", file = "file"
+        diffusion = "diffusion", file = "file",
+        maniphest = "maniphest"
 }
 
 /**
@@ -216,6 +275,55 @@ public abstract class PhabricatorAPI
     {
         // post data
         string[string] data;
+    }
+
+    /**
+     * Return paged data
+     */
+    private JSONValue paged(HTTP.Method method,
+                            Category cat,
+                            string call,
+                            DataRequest* req,
+                            StitchFunction stitch)
+    {
+        bool more = true;
+        JSONValue[] results;
+        string afterValue = null;
+        req.data["order"] = "newest";
+        while (more)
+        {
+            more = false;
+            if (afterValue !is null)
+            {
+                req.data[AfterKey] = afterValue;
+            }
+
+            auto current = this.request(method, cat, call, req);
+            results ~= current;
+            if (CursorKey in current[ResultKey])
+            {
+                auto cursor = current[ResultKey][CursorKey];
+                if (AfterKey in cursor)
+                {
+                    auto after = cursor[AfterKey];
+                    if (!after.isNull)
+                    {
+                        afterValue = after.str;
+                        more = true;
+                    }
+                }
+            }
+        }
+
+        switch (results.length)
+        {
+            case 0:
+                return parseJSON("{}");
+            case 1:
+                return results[0];
+            default:
+                return stitch(results);
+        }
     }
 
     /**

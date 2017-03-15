@@ -12,6 +12,15 @@ public enum ResultKey = "result";
 // Content key
 public enum ContentKey = "content";
 
+// Data key
+public enum DataKey = "data";
+
+// cursor key
+public enum CursorKey = "cursor";
+
+// after key
+public enum AfterKey = "after";
+
 /**
  * Settings to construct apis from
  */
