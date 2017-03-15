@@ -6,9 +6,10 @@
 module phabricator.conv2pdf;
 import phabricator.api;
 import phabricator.common;
+import std.file: write;
 import std.process: execute;
-import std.stdio;
 import std.string: indexOf, replace;
+import std.stdio: writeln;
 
 /**
  * Convert to pdf
@@ -44,11 +45,12 @@ public static bool convertPhriction(Settings settings,
     try
     {
         auto wiki = construct!PhrictionAPI(settings);
-        auto page = wiki.info(slug)[ContentKey].str;
+        auto page = wiki.info(slug)[ResultKey][ContentKey].str;
         return convert(page, output);
     }
     catch (Exception e)
     {
+        writeln(e);
         return false;
     }
 }
