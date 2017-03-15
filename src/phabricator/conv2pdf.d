@@ -6,10 +6,11 @@
 module phabricator.conv2pdf;
 import phabricator.api;
 import phabricator.common;
+import std.base64;
 import std.file: write;
 import std.process: execute;
 import std.stdio: writeln;
-import std.string: indexOf, replace;
+import std.string: endsWith, indexOf, replace;
 
 /**
  * Convert to pdf
@@ -33,6 +34,37 @@ private static bool convert(string document, string output)
                         "geometry:margin=0.8in"]);
     writeln(res);
     return res.status == 0;
+}
+
+/**
+ * Convert diffusion artifact to object
+ */
+public static bool convertDiffusion(Settings settings,
+                                    string path,
+                                    string callsign,
+                                    string branch,
+                                    string output)
+{
+    try
+    {
+        if (!path.endsWith(".md"))
+        {
+            throw new PhabricatorAPIException("only md files are supported");
+        }
+
+        auto diff = construct!DiffusionAPI(settings);
+        auto cnt = diff.fileContentByPathBranch(path, callsign, branch);
+        auto file = construct!FileAPI(settings);
+        auto download = file.download(cnt["filePHID"].str);
+        ubyte[] bytes = Base64.decode(download.str);
+        auto text = cast(string)bytes;
+        return convert(text, output);
+    }
+    catch (Exception e)
+    {
+        writeln(e);
+        return false;
+    }
 }
 
 /**

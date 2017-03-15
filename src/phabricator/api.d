@@ -7,6 +7,7 @@ module phabricator.api;
 import core.time;
 import std.json;
 import std.net.curl;
+import std.string: startsWith;
 import std.uri;
 
 // error code key
@@ -79,6 +80,54 @@ public class DashboardAPI : PhabricatorAPI
     }
 }
 
+/**
+ * File API
+ */
+public class FileAPI : PhabricatorAPI
+{
+    /**
+     * Download a file
+     */
+    public JSONValue download(string phid)
+    {
+        auto req = DataRequest();
+        req.data["phid"] = phid;
+        return this.request(HTTP.Method.post,
+                            Category.file,
+                            "download",
+                            &req);
+    }
+}
+
+/**
+ * Diffusion api
+ */
+public class DiffusionAPI : PhabricatorAPI
+{
+    /**
+     * Get file content by path, callsign, branch
+     */
+    public JSONValue fileContentByPathBranch(string path,
+                                             string callsign,
+                                             string branch)
+    {
+        string useCall = callsign;
+        if (!callsign.startsWith("r"))
+        {
+            useCall = "r" ~ callsign;
+        }
+
+        auto req = DataRequest();
+        req.data["path"] = path;
+        req.data["callsign"] = useCall;
+        req.data["branch"] = branch;
+        return this.request(HTTP.Method.post,
+                            Category.diffusion,
+                            "filecontentquery",
+                            &req);
+    }
+}
+
 ///
 version(PhabUnitTest)
 {
@@ -135,7 +184,8 @@ version(PhabUnitTest)
 public enum Category : string
 {
     // categories of the API methods
-    phriction = "phriction", dashboard = "dashboard"
+    phriction = "phriction", dashboard = "dashboard",
+        diffusion = "diffusion", file = "file"
 }
 
 /**
