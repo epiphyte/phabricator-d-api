@@ -58,6 +58,21 @@ public class PhrictionAPI : PhabricatorAPI
                             "info",
                             &req);
     }
+
+    /**
+     * Edit a page
+     */
+    public JSONValue edit(string slug, string title, string content)
+    {
+        auto req = DataRequest();
+        req.data["slug"] = slug;
+        req.data["title"] = title;
+        req.data["content"] = content;
+        return this.request(HTTP.Method.post,
+                            Category.phriction,
+                            "edit",
+                            &req);
+    }
 }
 
 /**
