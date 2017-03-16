@@ -6,7 +6,6 @@
 module phabricator.indexing;
 import phabricator.api;
 import phabricator.common;
-import std.algorithm: sort;
 import std.json;
 import std.stdio;
 
@@ -15,7 +14,6 @@ import std.stdio;
  */
 public static int[string] getIndexValues(Settings settings)
 {
-    int[string] vals;
     try
     {
         int[string] objs;
@@ -38,17 +36,12 @@ public static int[string] getIndexValues(Settings settings)
             }
         }
 
-        foreach (val; objs.keys.sort!("a < b"))
-        {
-            vals[val] = objs[val];
-        }
-
-        return vals;
+        return objs;
     }
     catch (Exception e)
     {
+        int[string] vals;
         writeln(e);
+        return vals;
     }
-
-    return vals;
 }
