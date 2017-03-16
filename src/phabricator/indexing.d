@@ -13,11 +13,12 @@ import std.stdio;
 /**
  * Get a list of all unique, sorted index values
  */
-public static string[] getIndexValues(Settings settings)
+public static int[string] getIndexValues(Settings settings)
 {
+    int[string] vals;
     try
     {
-        JSONValue[string] objs;
+        int[string] objs;
         auto maniphest = construct!ManiphestAPI(settings);
         foreach (obj; maniphest.all()[ResultKey][DataKey].array)
         {
@@ -27,15 +28,19 @@ public static string[] getIndexValues(Settings settings)
                 auto val = fields[IndexField];
                 if (!val.isNull)
                 {
-                    objs[val.str] = obj;
+                    if (val.str !in objs)
+                    {
+                        objs[val.str] = 0;
+                    }
+
+                    objs[val.str]++;
                 }
             }
         }
 
-        string[] vals;
         foreach (val; objs.keys.sort!("a < b"))
         {
-            vals ~= val;
+            vals[val] = objs[val];
         }
 
         return vals;
@@ -43,6 +48,7 @@ public static string[] getIndexValues(Settings settings)
     catch (Exception e)
     {
         writeln(e);
-        return [];
     }
+
+    return vals;
 }
