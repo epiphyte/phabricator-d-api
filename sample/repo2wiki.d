@@ -8,6 +8,7 @@ import phabricator.conv2wiki;
 import std.getopt;
 import std.stdio;
 
+// header to use
 private enum Header = "
 > this page is maintained by a bot
 > **DO NOT** edit this page directly
@@ -48,7 +49,14 @@ void main(string[] args)
     auto settings = Settings();
     settings.url = host;
     settings.token = token;
-    if (wikiDiffusion(settings, Header, slug, title, path, callsign, branch))
+    if (wikiDiffusion(settings,
+                      Header,
+                      slug,
+                      title,
+                      path,
+                      callsign,
+                      branch,
+                      Conv.catsub))
     {
         writeln("wiki updated");
     }

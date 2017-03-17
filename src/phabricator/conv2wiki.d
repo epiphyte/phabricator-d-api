@@ -9,7 +9,7 @@ import phabricator.common;
 import std.algorithm: sort;
 import std.csv;
 import std.stdio: writeln;
-import std.string: endsWith, format, join;
+import std.string: endsWith, format, join, split;
 
 /**
  * Base converter
@@ -135,6 +135,15 @@ private static string[] catSubCat(string text)
 }
 
 /**
+ * Converters available
+ */
+public enum Conv
+{
+    // conversion functions
+    catsub, raw
+}
+
+/**
  * Convert diffusion artifact to object
  */
 public static bool wikiDiffusion(Settings settings,
@@ -143,7 +152,8 @@ public static bool wikiDiffusion(Settings settings,
                                  string title,
                                  string path,
                                  string callsign,
-                                 string branch)
+                                 string branch,
+                                 Conv method)
 {
     try
     {
@@ -152,11 +162,19 @@ public static bool wikiDiffusion(Settings settings,
             throw new PhabricatorAPIException("only csv files are supported");
         }
 
-        auto text = join(catSubCat(getDiffusion(settings,
-                                                path,
-                                                callsign,
-                                                branch)), "\n");
+        string[] vals;
+        auto rawText = getDiffusion(settings, path, callsign, branch);
+        switch (method)
+        {
+            case Conv.catsub:
+                vals = catSubCat(rawText);
+                break;
+            default:
+                vals = rawText.split("\n");
+                break;
+        }
 
+        auto text = join(vals, "\n");
         auto phriction = construct!PhrictionAPI(settings);
         phriction.edit(slug, title, header ~ text);
         return true;
