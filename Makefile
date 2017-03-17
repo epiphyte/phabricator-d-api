@@ -15,6 +15,13 @@ all: clean
 
 test: unittest style
 
+define do-sample
+	dmd $(FLAGS) $(SRC) sample/$1 -of$(OUTPUT)/$1
+endef
+
+samples: clean
+	$(call do-sample,repo2wiki)
+
 unittest:
 	dmd $(SRC) "test/harness.d" -unittest -version=PhabUnitTest -of$(OUTPUT)/${NAME}
 	./$(OUTPUT)/$(NAME) > $(OUTPUT)/test.log
