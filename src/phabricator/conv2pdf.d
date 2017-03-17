@@ -6,7 +6,6 @@
 module phabricator.conv2pdf;
 import phabricator.api;
 import phabricator.common;
-import std.base64;
 import std.file: write;
 import std.process: execute;
 import std.stdio: writeln;
@@ -52,12 +51,7 @@ public static bool convertDiffusion(Settings settings,
             throw new PhabricatorAPIException("only md files are supported");
         }
 
-        auto diff = construct!DiffusionAPI(settings);
-        auto cnt = diff.fileContentByPathBranch(path, callsign, branch);
-        auto file = construct!FileAPI(settings);
-        auto download = file.download(cnt[ResultKey]["filePHID"].str);
-        ubyte[] bytes = Base64.decode(download[ResultKey].str);
-        auto text = cast(string)bytes;
+        auto text = getDiffusion(settings, path, callsign, branch);
         return convert(text, output);
     }
     catch (Exception e)
