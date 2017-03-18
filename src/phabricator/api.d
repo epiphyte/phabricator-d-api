@@ -88,7 +88,7 @@ public class DashboardAPI : PhabricatorAPI
     public JSONValue editText(string identifier, string text)
     {
         auto req = this.buildTrans(identifier,
-                                   [tuple("custom.text", text)]);
+                                   [tuple("custom.text", text, false)]);
         return this.request(HTTP.Method.post,
                             Category.dashboard,
                             "panel.edit",
@@ -184,8 +184,15 @@ public class ManiphestAPI : PhabricatorAPI
      */
     public JSONValue comment(string phid, string text)
     {
-        auto req = this.buildTrans(phid,
-                                   [tuple("comment", text)]);
+        return this.edit(phid, [tuple("comment", text, false)]);
+    }
+
+    /**
+     * Edit a task
+     */
+    private JSONValue edit(string phid, Tuple!(string, string, bool)[] trans)
+    {
+        auto req = this.buildTrans(phid, trans);
         return this.request(HTTP.Method.post,
                             Category.maniphest,
                             "edit",
@@ -221,7 +228,7 @@ public class ManiphestAPI : PhabricatorAPI
      */
     public JSONValue addProject(string phid, string projectPHID)
     {
-        return JSONValue();
+        return this.edit(phid, [tuple("projects.add", projectPHID, true)]);;
     }
 
     /**
@@ -229,7 +236,7 @@ public class ManiphestAPI : PhabricatorAPI
      */
     public JSONValue invalid(string phid)
     {
-        return JSONValue();
+        return this.edit(phid, [tuple("status", "invalid", false)]);
     }
 
     /**
@@ -476,7 +483,7 @@ public abstract class PhabricatorAPI
      * Build a transaction set
      */
     private DataRequest buildTrans(string id,
-                                   Tuple!(string, string)[] objs)
+                                   Tuple!(string, string, bool)[] objs)
     {
         auto req = DataRequest();
         req.data["objectIdentifier"] = id;
@@ -485,7 +492,13 @@ public abstract class PhabricatorAPI
         {
             auto trans = "transactions[" ~ to!string(idx) ~ "]";
             req.data[trans ~ "[type]"] = obj[0];
-            req.data[trans ~ "[value]"] = obj[1];
+            string vals = trans ~ "[value]";
+            if (obj[2])
+            {
+                vals = vals ~ "[]";
+            }
+
+            req.data[vals] = obj[1];
             idx++;
         }
 
