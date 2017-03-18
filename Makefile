@@ -20,6 +20,7 @@ define do-sample
 endef
 
 samples: clean
+	$(call do-sample,tasking)
 	$(call do-sample,repo2wiki)
 
 unittest:

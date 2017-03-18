@@ -6,9 +6,11 @@
 module phabricator.api;
 import core.time;
 import phabricator.common;
+import std.conv: to;
 import std.json;
 import std.net.curl;
 import std.string: startsWith, toUpper;
+import std.typecons;
 import std.uri;
 
 // error code key
@@ -85,10 +87,8 @@ public class DashboardAPI : PhabricatorAPI
      */
     public JSONValue editText(string identifier, string text)
     {
-        auto req = DataRequest();
-        req.data["transactions[0][type]"] = "custom.text";
-        req.data["transactions[0][value]"] = text;
-        req.data["objectIdentifier"] = identifier;
+        auto req = this.buildTrans(identifier,
+                                   [tuple("custom.text", text)]);
         return this.request(HTTP.Method.post,
                             Category.dashboard,
                             "panel.edit",
@@ -158,6 +158,19 @@ public class ManiphestAPI : PhabricatorAPI
         }
 
         return stitched;
+    }
+
+    /**
+     * Comment on a task
+     */
+    public JSONValue comment(string phid, string text)
+    {
+        auto req = this.buildTrans(phid,
+                                   [tuple("comment", text)]);
+        return this.request(HTTP.Method.post,
+                            Category.maniphest,
+                            "edit",
+                            &req);
     }
 
     /**
@@ -258,6 +271,28 @@ version(PhabUnitTest)
                                 "test",
                                 null);
         }
+
+        /**
+         * Transaction testing
+         */
+        public DataRequest trans()
+        {
+            return this.buildTrans("test",
+                                   [tuple("abc", "xyz"),
+                                    tuple("123", "456")]);
+        }
+
+        unittest
+        {
+            auto api = new TestAPI();
+            auto trans = api.trans();
+            assert(trans.data.keys.length == 5);
+            assert(trans.data["objectIdentifier"] == "test");
+            assert(trans.data["transactions[0][type]"] == "abc");
+            assert(trans.data["transactions[1][type]"] == "123");
+            assert(trans.data["transactions[0][value]"] == "xyz");
+            assert(trans.data["transactions[1][value]"] == "456");
+        }
     }
 
     unittest
@@ -311,6 +346,26 @@ public abstract class PhabricatorAPI
     this ()
     {
         this.timeout = 30;
+    }
+
+    /**
+     * Build a transaction set
+     */
+    private DataRequest buildTrans(string id,
+                                   Tuple!(string, string)[] objs)
+    {
+        auto req = DataRequest();
+        req.data["objectIdentifier"] = id;
+        int idx = 0;
+        foreach (obj; objs)
+        {
+            auto trans = "transactions[" ~ to!string(idx) ~ "]";
+            req.data[trans ~ "[type]"] = obj[0];
+            req.data[trans ~ "[value]"] = obj[1];
+            idx++;
+        }
+
+        return req;
     }
 
     /**
