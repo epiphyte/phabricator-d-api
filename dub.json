@@ -1,0 +1,9 @@
+{
+	"name": "phabricator-d-api",
+	"description": "An implementation of the phabricator conduit API for D.",
+	"authors": ["Sean Enck"],
+	"homepage": "https://github.com/epiphyte/phabricator-d-api",
+	"license": "MIT",
+	"dependencies": {
+	}
+}
