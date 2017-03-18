@@ -6,9 +6,49 @@
 module phabricator.tasks;
 import phabricator.api;
 import phabricator.common;
+import std.conv: to;
 import std.datetime;
 import std.json;
 import std.stdio: writeln;
+
+/**
+ * Tasks for a project needing action
+ */
+public static string[] actionNeeded(Settings settings,
+                                    string projectPHID)
+{
+    try
+    {
+        auto users = construct!UserAPI(settings);
+        auto userPHID = users.whoami()[ResultKey][PHID].str;
+        auto maniphest = construct!ManiphestAPI(settings);
+        auto raw = maniphest.openSubscribedProject(projectPHID, userPHID);
+        auto all = raw[ResultKey][DataKey];
+        string[] results;
+        foreach (task; all.array)
+        {
+            if (FieldsKey in task)
+            {
+                auto fields = task[FieldsKey];
+                if (StatusKey in fields)
+                {
+                    auto status = fields[StatusKey];
+                    if (status["value"].str == "actionneeded")
+                    {
+                        results ~= "T" ~ to!string(task["id"].integer);
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+    catch (Exception e)
+    {
+        writeln(e);
+        return [];
+    }
+}
 
 /**
  * Comment on overdue tasks

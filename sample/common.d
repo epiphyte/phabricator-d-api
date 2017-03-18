@@ -1,15 +1,16 @@
 /**
  * Copyright 2017
  * MIT License
- * Tasking sample
+ * Common settings definition
  */
+module sample.common;
 import phabricator.common;
-import phabricator.tasks;
 import std.getopt;
-import std.stdio;
 
-// main entry
-void main(string[] args)
+/**
+ * Get settings
+ */
+Settings getSettings(string[] args)
 {
     string host;
     string token;
@@ -23,12 +24,5 @@ void main(string[] args)
     auto settings = Settings();
     settings.url = host;
     settings.token = token;
-    if (overdue(settings))
-    {
-        writeln("overdue tasks updated");
-    }
-    else
-    {
-        writeln("failed to update overdue tasks");
-    }
+    return settings;
 }

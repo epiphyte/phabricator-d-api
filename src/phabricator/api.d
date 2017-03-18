@@ -182,6 +182,18 @@ public class ManiphestAPI : PhabricatorAPI
     }
 
     /**
+     * Open and subscribed projects
+     */
+    public JSONValue openSubscribedProject(string projectPHID, string userPHID)
+    {
+        string[string] constraints;
+        constraints["subscribers"] = userPHID;
+        constraints["projects"] = projectPHID;
+        auto req = this.getQuery(OpenQuery, constraints);
+        return this.search(req);
+    }
+
+    /**
      * All tasks
      */
     public JSONValue all()
@@ -190,12 +202,37 @@ public class ManiphestAPI : PhabricatorAPI
     }
 
     /**
+     * Get a query request with key and constraints (optional)
+     */
+    private DataRequest getQuery(string key, string[string] constraints = null)
+    {
+        auto req = DataRequest();
+        req.data["queryKey"] = key;
+        if (constraints !is null)
+        {
+            foreach (val; constraints.keys)
+            {
+                req.data["constraints[" ~ val ~ "][0]"] = constraints[val];
+            }
+        }
+
+        return req;
+    }
+
+    /**
      * Get by query key
      */
     private JSONValue byQueryKey(string key)
     {
-        auto req = DataRequest();
-        req.data["queryKey"] = key;
+        auto req = this.getQuery(key);
+        return this.search(req);
+    }
+
+    /**
+     * Search requests
+     */
+    private JSONValue search(DataRequest req)
+    {
         return this.getData("search", &req);
     }
 
@@ -325,7 +362,24 @@ public enum Category : string
     // categories of the API methods
     phriction = "phriction", dashboard = "dashboard",
         diffusion = "diffusion", file = "file",
-        maniphest = "maniphest"
+        maniphest = "maniphest", user = "user"
+}
+
+/**
+ * User API
+ */
+public class UserAPI : PhabricatorAPI
+{
+    /**
+     * Get user information
+     */
+    public JSONValue whoami()
+    {
+        return this.request(HTTP.Method.post,
+                            Category.user,
+                            "whoami",
+                            null);
+    }
 }
 
 /**

@@ -16,11 +16,11 @@ all: clean
 test: unittest style
 
 define do-sample
-	dmd $(FLAGS) $(SRC) sample/$1 -of$(OUTPUT)/$1
+	dmd $(FLAGS) $(SRC) sample/common.d sample/$1 -of$(OUTPUT)/$1
 endef
 
 samples: clean
-	$(call do-sample,tasking)
+	$(call do-sample,due)
 	$(call do-sample,repo2wiki)
 
 unittest:

@@ -34,6 +34,9 @@ public enum DueDate = CustomField ~ "duedate";
 // fields key
 public enum FieldsKey = "fields";
 
+// status key
+public enum StatusKey = "status";
+
 // PHID object identifiers
 public enum PHID = "phid";
 
