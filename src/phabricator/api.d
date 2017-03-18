@@ -381,8 +381,8 @@ version(PhabUnitTest)
         public DataRequest trans()
         {
             return this.buildTrans("test",
-                                   [tuple("abc", "xyz"),
-                                    tuple("123", "456")]);
+                                   [tuple("abc", "xyz", true),
+                                    tuple("123", "456", false)]);
         }
 
         unittest
@@ -393,7 +393,7 @@ version(PhabUnitTest)
             assert(trans.data["objectIdentifier"] == "test");
             assert(trans.data["transactions[0][type]"] == "abc");
             assert(trans.data["transactions[1][type]"] == "123");
-            assert(trans.data["transactions[0][value]"] == "xyz");
+            assert(trans.data["transactions[0][value][]"] == "xyz");
             assert(trans.data["transactions[1][value]"] == "456");
         }
     }
