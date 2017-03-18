@@ -12,6 +12,61 @@ import std.json;
 import std.stdio: writeln;
 
 /**
+ * Get a task id e.g. T[0-9]+
+ */
+private static string getId(JSONValue task)
+{
+    return "T" ~ to!string(task["id"].integer);
+}
+
+/**
+ * Unmodified task handling
+ */
+public static bool unmodified(Settings settings,
+                                  string projectPHID,
+                                  int months)
+{
+    try
+    {
+        auto maniphest = construct!ManiphestAPI(settings);
+        auto all = maniphest.openProject(projectPHID)[ResultKey][DataKey];
+        foreach (task; all.array)
+        {
+            maniphest.invalid(task[PHID].str);
+        }
+
+        string[] projs;
+        auto active = construct!ProjectAPI(settings).active();
+        auto now = Clock.currTime();
+        foreach (proj; active[ResultKey][DataKey].array)
+        {
+            auto open = maniphest.openProject(proj[PHID].str);
+            foreach (task; open[ResultKey][DataKey].array)
+            {
+                if (FieldsKey in task)
+                {
+                    auto fields = task[FieldsKey];
+                    auto modified = fields["dateModified"].integer;
+                    auto actual = SysTime.fromUnixTime(modified);
+                    actual.add!"months"(months);
+                    if (actual < now)
+                    {
+                        maniphest.addProject(task[PHID].str, projectPHID);
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+    catch (Exception e)
+    {
+        writeln(e);
+        return false;
+    }
+}
+
+/**
  * Tasks for a project needing action
  */
 public static string[] actionNeeded(Settings settings,
@@ -35,7 +90,7 @@ public static string[] actionNeeded(Settings settings,
                     auto status = fields[StatusKey];
                     if (status["value"].str == "actionneeded")
                     {
-                        results ~= "T" ~ to!string(task["id"].integer);
+                        results ~= getId(task);
                     }
                 }
             }

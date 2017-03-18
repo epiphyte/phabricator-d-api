@@ -9,7 +9,7 @@ import phabricator.common;
 import std.conv: to;
 import std.json;
 import std.net.curl;
-import std.string: startsWith, toUpper;
+import std.string: join, startsWith, toUpper;
 import std.typecons;
 import std.uri;
 
@@ -92,6 +92,25 @@ public class DashboardAPI : PhabricatorAPI
         return this.request(HTTP.Method.post,
                             Category.dashboard,
                             "panel.edit",
+                            &req);
+    }
+}
+
+/**
+ * Project API
+ */
+public class ProjectAPI : PhabricatorAPI
+{
+    /**
+     * Active projects
+     */
+    public JSONValue active()
+    {
+        // NOTE: needs to eventually support paging
+        auto req = this.fromKey("active");
+        return this.request(HTTP.Method.post,
+                            Category.project,
+                            "search",
                             &req);
     }
 }
@@ -182,13 +201,54 @@ public class ManiphestAPI : PhabricatorAPI
     }
 
     /**
+     * Open by project
+     */
+    public JSONValue openProject(string projectPHID)
+    {
+        return this.openConstrained(projectPHID);
+    }
+
+    /**
      * Open and subscribed projects
      */
     public JSONValue openSubscribedProject(string projectPHID, string userPHID)
     {
+        return this.openConstrained(projectPHID, userPHID);
+    }
+
+    /**
+     * Add a project to a task
+     */
+    public JSONValue addProject(string phid, string projectPHID)
+    {
+        return JSONValue();
+    }
+
+    /**
+     * Invalidate a task
+     */
+    public JSONValue invalid(string phid)
+    {
+        return JSONValue();
+    }
+
+    /**
+     * Open query but with constraints
+     */
+    private JSONValue openConstrained(string projectPHIDs,
+                                      string ccPHIDs = null)
+    {
         string[string] constraints;
-        constraints["subscribers"] = userPHID;
-        constraints["projects"] = projectPHID;
+        if (projectPHIDs !is null)
+        {
+            constraints["projects"] = projectPHIDs;
+        }
+
+        if (ccPHIDs !is null)
+        {
+            constraints["subscribers"] = ccPHIDs;
+        }
+
         auto req = this.getQuery(OpenQuery, constraints);
         return this.search(req);
     }
@@ -206,8 +266,7 @@ public class ManiphestAPI : PhabricatorAPI
      */
     private DataRequest getQuery(string key, string[string] constraints = null)
     {
-        auto req = DataRequest();
-        req.data["queryKey"] = key;
+        auto req = this.fromKey(key);
         if (constraints !is null)
         {
             foreach (val; constraints.keys)
@@ -362,7 +421,8 @@ public enum Category : string
     // categories of the API methods
     phriction = "phriction", dashboard = "dashboard",
         diffusion = "diffusion", file = "file",
-        maniphest = "maniphest", user = "user"
+        maniphest = "maniphest", user = "user",
+        project = "project"
 }
 
 /**
@@ -400,6 +460,16 @@ public abstract class PhabricatorAPI
     this ()
     {
         this.timeout = 30;
+    }
+
+    /**
+     * Build request from query key
+     */
+    private DataRequest fromKey(string key)
+    {
+        auto req = DataRequest();
+        req.data["queryKey"] = key;
+        return req;
     }
 
     /**
