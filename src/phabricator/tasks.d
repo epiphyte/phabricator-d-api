@@ -20,6 +20,32 @@ private static string getId(JSONValue task)
 }
 
 /**
+ * Move all tasks from a query to a project
+ */
+public static int queryToProject(Settings settings,
+                                   string query,
+                                   string projectPHID)
+{
+    int count = 0;
+    try
+    {
+        auto maniphest = construct!ManiphestAPI(settings);
+        auto queried = maniphest.byQueryKey(query)[ResultKey][DataKey];
+        foreach (task; queried.array)
+        {
+            maniphest.addProject(task[PHID].str, projectPHID);
+            count++;
+        }
+
+    }
+    catch (Exception e)
+    {
+    }
+
+    return count;
+}
+
+/**
  * Unmodified task handling
  */
 public static bool unmodified(Settings settings,
