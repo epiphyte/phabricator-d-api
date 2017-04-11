@@ -40,6 +40,7 @@ public static int queryToProject(Settings settings,
     }
     catch (Exception e)
     {
+        count = -1;
     }
 
     return count;
