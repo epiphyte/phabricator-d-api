@@ -288,7 +288,7 @@ public class ManiphestAPI : PhabricatorAPI
     /**
      * Get by query key
      */
-    private JSONValue byQueryKey(string key)
+    public JSONValue byQueryKey(string key)
     {
         auto req = this.getQuery(key);
         return this.search(req);
