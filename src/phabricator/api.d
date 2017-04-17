@@ -44,6 +44,32 @@ version(PhabUnitTest)
 }
 
 /**
+ * Remarkup API
+ */
+public class RemarkupAPI : PhabricatorAPI
+{
+    /**
+     * Process text
+     */
+    public JSONValue process(string context, string[] text)
+    {
+        auto req = DataRequest();
+        req.data["context"] = context;
+        int idx = 0;
+        foreach (item; text)
+        {
+            req.data["contents[" ~ to!string(idx) ~ "]"] = item;
+            idx++;
+        }
+
+        return this.request(HTTP.Method.post,
+                            Category.remarkup,
+                            "process",
+                            &req);
+    }
+}
+
+/**
  * Wiki/phriction API
  */
 public class PhrictionAPI : PhabricatorAPI
@@ -429,7 +455,7 @@ public enum Category : string
     phriction = "phriction", dashboard = "dashboard",
         diffusion = "diffusion", file = "file",
         maniphest = "maniphest", user = "user",
-        project = "project"
+        project = "project", remarkup = "remarkup"
 }
 
 /**
