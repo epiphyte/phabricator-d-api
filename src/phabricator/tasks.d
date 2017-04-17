@@ -36,7 +36,6 @@ public static int queryToProject(Settings settings,
             maniphest.addProject(task[PHID].str, projectPHID);
             count++;
         }
-
     }
     catch (Exception e)
     {
