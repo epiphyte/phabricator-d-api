@@ -466,7 +466,7 @@ public class UserAPI : PhabricatorAPI
     /**
      * Get user information
      */
-    public JSONValue whoami()
+    deprecated("user.whoami is being deprecated upstream") public JSONValue whoami()
     {
         return this.request(HTTP.Method.post,
                             Category.user,
