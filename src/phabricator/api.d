@@ -508,6 +508,9 @@ public abstract class PhabricatorAPI
     // url/host to use
     @property public string url;
 
+    // user PHID
+    @property public string userPHID;
+
     // client timeout
     @property public int timeout;
 

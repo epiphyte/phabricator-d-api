@@ -96,12 +96,12 @@ public static bool unmodified(Settings settings,
  * Tasks for a project needing action
  */
 public static string[] actionNeeded(Settings settings,
-                                    string projectPHID)
+                                    string projectPHID,
+                                    string userPHID)
 {
     try
     {
         auto users = construct!UserAPI(settings);
-        auto userPHID = users.whoami()[ResultKey][PHID].str;
         auto maniphest = construct!ManiphestAPI(settings);
         auto raw = maniphest.openSubscribedProject(projectPHID, userPHID);
         auto all = raw[ResultKey][DataKey];
