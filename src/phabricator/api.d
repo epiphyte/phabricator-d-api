@@ -473,6 +473,27 @@ public class UserAPI : PhabricatorAPI
                             "whoami",
                             null);
     }
+
+    /**
+     * Get active users
+     */
+    public JSONValue activeUsers()
+    {
+        auto req = DataRequest();
+        req.data["constraints[isBot]"] = "0";
+        return this.search("active", &req);
+    }
+
+    /**
+     * Perform a search operation
+     */
+    private JSONValue search(string queryKey, DataRequest* req)
+    {
+        return this.request(HTTP.Method.post,
+                            Category.user,
+                            "search",
+                            req);
+    }
 }
 
 /**
