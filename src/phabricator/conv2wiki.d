@@ -69,6 +69,96 @@ private class Tree
 }
 
 /**
+ * Convert to a markdown table
+ */
+private abstract class Table : Converter
+{
+    /**
+     * Setup the table (headers, spacers)
+     */
+    public string[] setup()
+    {
+        auto header = this.headers();
+        string[] spacer;
+        foreach (head; header)
+        {
+            spacer ~= "---";
+        }
+
+        return [toRow(header), toRow(spacer)];
+    }
+
+    /**
+     * Convert an array to a table row
+     */
+    private static toRow(string[] values)
+    {
+        return "| " ~ join(values, " | ") ~ " |";
+    }
+
+    /**
+     * Get the result records as a markdown table row
+     */
+    public string toRow()
+    {
+        return toRow(this.values());
+    }
+
+    /**
+     * Get the header names
+     */
+    protected abstract string[] headers();
+}
+
+/**
+ * Table made up of (name, alias, aka) columns
+ */
+private class NameAliasAlsoTable : Table
+{
+    // name of entity
+    @property public string name;
+
+    // alias value
+    @property public string aliased;
+
+    // aka/also aliased as
+    @property public string also;
+
+    // inherit doc
+    public override string[] values()
+    {
+        return [this.name, this.aliased, this.also];
+    }
+
+    // inherit doc
+    protected override string[] headers()
+    {
+        return ["name", "alias", "aka"];
+    }
+}
+
+/**
+ * Convert CSV input into a markdown table
+ */
+private static string[] table(T : Table)(string text)
+    if (is(typeof(new T()) == T))
+{
+    string[] results;
+    auto headers = new T();
+    foreach (header; headers.setup())
+    {
+        results ~= header;
+    }
+
+    foreach (record; csvReader!NameAliasAlsoTable(text))
+    {
+        results ~= record.toRow();
+    }
+
+    return results;
+}
+
+/**
  * Use CatSubCat for conversion
  */
 private static string[] catSubCat(string text)
@@ -140,7 +230,7 @@ private static string[] catSubCat(string text)
 public enum Conv
 {
     // conversion functions
-    catsub, raw
+    catsub, raw, nameAlias
 }
 
 /**
@@ -168,6 +258,9 @@ public static bool wikiDiffusion(Settings settings,
         {
             case Conv.catsub:
                 vals = catSubCat(rawText);
+                break;
+            case Conv.nameAlias:
+                vals = table!NameAliasAlsoTable(rawText);
                 break;
             default:
                 vals = rawText.split("\n");
