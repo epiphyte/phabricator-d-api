@@ -480,7 +480,7 @@ public class UserAPI : PhabricatorAPI
      */
     public JSONValue activeUsers()
     {
-        auto req = DataRequest();
+        auto req = this.fromKey("active");
         req.data["constraints[isBot]"] = "0";
         return this.search("active", &req);
     }
