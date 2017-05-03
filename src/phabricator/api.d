@@ -455,7 +455,8 @@ public enum Category : string
     phriction = "phriction", dashboard = "dashboard",
         diffusion = "diffusion", file = "file",
         maniphest = "maniphest", user = "user",
-        project = "project", remarkup = "remarkup"
+        project = "project", remarkup = "remarkup",
+        paste = "paste"
 }
 
 /**
@@ -482,18 +483,50 @@ public class UserAPI : PhabricatorAPI
     {
         auto req = this.fromKey("active");
         req.data["constraints[isBot]"] = "0";
-        return this.search("active", &req);
+        return this.search(&req);
     }
 
     /**
      * Perform a search operation
      */
-    private JSONValue search(string queryKey, DataRequest* req)
+    private JSONValue search(DataRequest* req)
     {
         return this.request(HTTP.Method.post,
                             Category.user,
                             "search",
                             req);
+    }
+}
+
+/**
+ * Paste API
+ */
+public class PasteAPI : PhabricatorAPI
+{
+    /**
+     * Edit paste text
+     */
+    public JSONValue editText(string phid, string text)
+    {
+        auto req = this.buildTrans(phid,
+                                   [tuple("text", text, false)]);
+        return this.request(HTTP.Method.post,
+                            Category.paste,
+                            "edit",
+                            &req);
+    }
+
+    /**
+     * Get an active paste by phid
+     */
+    public JSONValue activeByPHID(string phid)
+    {
+        auto req = this.fromKey("active");
+        req.data["constraints[phids][0]"] = phid;
+        return this.request(HTTP.Method.post,
+                            Category.paste,
+                            "search",
+                            &req);
     }
 }
 
