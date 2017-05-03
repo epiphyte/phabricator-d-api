@@ -1,7 +1,7 @@
 /**
  * Copyright 2017
  * MIT License
- * Tasking sample
+ * User sample
  */
 import phabricator.api;
 import phabricator.common;

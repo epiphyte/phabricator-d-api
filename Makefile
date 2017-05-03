@@ -20,6 +20,7 @@ define do-sample
 endef
 
 samples: clean
+	$(call do-sample,tasks)
 	$(call do-sample,users)
 	$(call do-sample,due)
 	$(call do-sample,repo2wiki)

@@ -11,12 +11,15 @@ import std.datetime;
 import std.json;
 import std.stdio: writeln;
 
+// Id field for tasks
+private enum IdField = "id";
+
 /**
  * Get a task id e.g. T[0-9]+
  */
 private static string getId(JSONValue task)
 {
-    return "T" ~ to!string(task["id"].integer);
+    return "T" ~ to!string(task[IdField].integer);
 }
 
 /**
@@ -89,6 +92,65 @@ public static bool unmodified(Settings settings,
     {
         writeln(e);
         return false;
+    }
+}
+
+/**
+ * Detects restricted tasks
+ */
+public static string[] restricted(Settings settings, int start, int page)
+{
+    try
+    {
+        if (page < 0)
+        {
+            return [];
+        }
+
+        int paging = 0;
+        int[] ids;
+        bool[long] matched;
+        while (paging <= page)
+        {
+            ids ~= start + paging;
+            matched[start + paging] = false;
+            paging++;
+        }
+
+        auto maniphest = construct!ManiphestAPI(settings);
+        auto raw = maniphest.byIds(ids);
+        auto all = raw[ResultKey][DataKey];
+        foreach (task; all.array)
+        {
+            if (FieldsKey in task)
+            {
+                auto id = task[IdField].integer;
+                if (id in matched)
+                {
+                    matched[id] = true;
+                }
+                else
+                {
+                    matched[id] = false;
+                }
+            }
+        }
+
+        string[] results;
+        foreach (match; matched.byKey())
+        {
+            if (!matched[match])
+            {
+                results ~= to!string(match);
+            }
+        }
+
+        return results;
+    }
+    catch (Exception e)
+    {
+        writeln(e);
+        return [];
     }
 }
 

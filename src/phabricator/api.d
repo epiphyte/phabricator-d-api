@@ -9,12 +9,24 @@ import phabricator.common;
 import std.conv: to;
 import std.json;
 import std.net.curl;
-import std.string: join, startsWith, toUpper;
+import std.string: format, join, startsWith, toUpper;
 import std.typecons;
 import std.uri;
 
 // error code key
 private enum ErrorCode = "error_code";
+
+// Posting code prefix for mixin
+private enum PostPrefix = "val = cast(string)post(endpoint, re.";
+
+// Posting code suffix for mixin
+private enum PostSuffix = ", client);";
+
+// Encoded data from request
+private enum PostEncoded = PostPrefix ~ "encoded" ~ PostSuffix;
+
+// Mapped values from request data
+private enum PostMapped = PostPrefix ~ "data" ~ PostSuffix;
 
 /**
  * Generalized exceptions
@@ -292,6 +304,40 @@ public class ManiphestAPI : PhabricatorAPI
     public JSONValue all()
     {
         return this.byQueryKey(AllQuery);
+    }
+
+    /**
+     * Get all, by identifier
+     */
+    public JSONValue byIds(int[] identifiers)
+    {
+        auto req = this.getQuery(AllQuery);
+        if (identifiers !is null && identifiers.length > 0)
+        {
+            Tuple!(string, string)[] function(string[]) iterate =
+                   function Tuple!(string, string)[](string[] state)
+            {
+                int idx = 0;
+                Tuple!(string, string)[] objs;
+                foreach (id; state)
+                {
+                    objs ~= tuple("constraints[ids][" ~ to!string(idx) ~ "]",
+                                  id);
+                    idx++;
+                }
+
+                return objs;
+            };
+
+            req.urlFunction = iterate;
+            foreach (id; identifiers)
+            {
+                req.raw ~= to!string(id);
+            }
+        }
+
+        req.urlEncode = true;
+        return this.search(req);
     }
 
     /**
@@ -596,6 +642,40 @@ public abstract class PhabricatorAPI
     {
         // post data
         string[string] data;
+
+        // using URL encoded data
+        bool urlEncode = false;
+
+        // encoded data
+        string encoded;
+
+        // Raw values to encode
+        string[] raw;
+
+        Tuple!(string, string)[] function(string[] input) urlFunction;
+
+        void encode()
+        {
+            this.encoded = "";
+            if (!this.urlEncode ||
+                this.raw.length == 0 ||
+                this.urlFunction is null)
+            {
+                return;
+            }
+
+            string[] results;
+            foreach (obj; this.urlFunction(this.raw))
+            {
+                results ~= format("%s=%s", obj[0], obj[1]);
+            }
+
+            this.encoded = join(results, "&");
+            if (this.urlEncode && this.encoded.length == 0)
+            {
+                throw new PhabricatorAPIException("URL encoded but no values");
+            }
+        }
     }
 
     /**
@@ -670,6 +750,7 @@ public abstract class PhabricatorAPI
                 re = *req;
             }
 
+            re.encode();
             auto endpoint = this.url ~ "/api/" ~ cat ~ "." ~ call;
             bool curl = true;
             version(PhabUnitTest)
@@ -698,10 +779,20 @@ public abstract class PhabricatorAPI
                 client.addRequestHeader("ContentType", "application/json");
             }
 
-            re.data["api.token"] = this.token;
             if (curl)
             {
-                val = cast(string)post(endpoint, re.data, client);
+                string[string] mapped;
+                string encoded;
+                if (re.urlEncode)
+                {
+                    re.encoded ~= "&api.token=" ~ this.token;
+                    mixin(PostEncoded);
+                }
+                else
+                {
+                    re.data["api.token"] = this.token;
+                    mixin(PostMapped);
+                }
             }
 
             version(PhabUnitTest)
