@@ -11,7 +11,11 @@
     {
         "d.tokens.ExprSpacing":
         {
-            "./src/phabricator/api.d": ["746", "749"]
+            "./src/phabricator/api.d":
+            [
+                "56a676b48bd8eccf635d618b66ad55da910d3bf4",
+                "e5ca47f4727f2da51a109e3543f8853400614159"
+            ]
         }
     }
 }
