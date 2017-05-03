@@ -314,15 +314,17 @@ public class ManiphestAPI : PhabricatorAPI
         auto req = this.getQuery(AllQuery);
         if (identifiers !is null && identifiers.length > 0)
         {
-            Tuple!(string, string)[] function(string[]) iterate =
-                   function Tuple!(string, string)[](string[] state)
+            DataRequest.KeyValue[] function(string[]) iterate =
+                   function DataRequest.KeyValue[](string[] state)
             {
                 int idx = 0;
-                Tuple!(string, string)[] objs;
+                DataRequest.KeyValue[] objs;
                 foreach (id; state)
                 {
-                    objs ~= tuple("constraints[ids][" ~ to!string(idx) ~ "]",
-                                  id);
+                    auto obj = DataRequest.KeyValue();
+                    obj.key = "constraints[ids][" ~ to!string(idx) ~ "]";
+                    obj.value = id;
+                    objs ~= obj;
                     idx++;
                 }
 
@@ -640,6 +642,18 @@ public abstract class PhabricatorAPI
      */
     public struct DataRequest
     {
+        /**
+         * Key/Value pair
+         */
+        public struct KeyValue
+        {
+            // key of item
+            string key;
+
+            // value of item
+            string value;
+        }
+
         // post data
         string[string] data;
 
@@ -652,31 +666,89 @@ public abstract class PhabricatorAPI
         // Raw values to encode
         string[] raw;
 
-        Tuple!(string, string)[] function(string[] input) urlFunction;
+        // URL encoding function to get key/value pairs to encode
+        KeyValue[] function(string[] input) urlFunction;
 
+        // encode the internal url as set
         void encode()
         {
             this.encoded = "";
-            if (!this.urlEncode ||
-                this.raw.length == 0 ||
-                this.urlFunction is null)
+            if (!this.urlEncode)
             {
                 return;
             }
 
-            string[] results;
-            foreach (obj; this.urlFunction(this.raw))
+            if (this.raw.length > 0 && this.urlFunction !is null)
             {
-                results ~= format("%s=%s", obj[0], obj[1]);
+                string[] results;
+                foreach (obj; this.urlFunction(this.raw))
+                {
+                    results ~= format("%s=%s", obj.key, obj.value);
+                }
+
+                this.encoded = join(results, "&");
             }
 
-            this.encoded = join(results, "&");
             if (this.urlEncode && this.encoded.length == 0)
             {
                 throw new PhabricatorAPIException("URL encoded but no values");
             }
         }
     }
+
+///
+version(PhabUnitTest)
+{
+    unittest
+    {
+        auto req = DataRequest();
+        req.encode();
+        assert(req.encoded == "");
+        req.urlEncode = true;
+        try
+        {
+            req.encode();
+            assert(false);
+        }
+        catch (PhabricatorAPIException e)
+        {
+            assert(e.msg == "URL encoded but no values");
+        }
+
+        req.raw ~= "test";
+        try
+        {
+            req.encode();
+            assert(false);
+        }
+        catch (PhabricatorAPIException e)
+        {
+            assert(e.msg == "URL encoded but no values");
+        }
+
+        DataRequest.KeyValue[] function(string[]) fxn =
+            function DataRequest.KeyValue[](string[] state)
+        {
+            DataRequest.KeyValue[] objs;
+            foreach (obj; state)
+            {
+                auto test = DataRequest.KeyValue();
+                test.key = "test";
+                test.value = obj;
+                objs ~= test;
+            }
+
+            return objs;
+        };
+
+        req.urlFunction = fxn;
+        req.encode();
+        assert(req.encoded == "test=test");
+        req.raw ~= "test2";
+        req.encode();
+        assert(req.encoded == "test=test&test=test2");
+    }
+}
 
     /**
      * Return paged data

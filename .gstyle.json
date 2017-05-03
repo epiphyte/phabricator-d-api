@@ -6,5 +6,12 @@
             "name": "\\.d$",
             "recursive": "true"
         }
-    ]
+    ],
+    "ignores":
+    {
+        "d.tokens.ExprSpacing":
+        {
+            "./src/phabricator/api.d": ["746", "749"]
+        }
+    }
 }
