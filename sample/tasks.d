@@ -3,25 +3,28 @@
  * MIT License
  * Tasking sample
  */
+import phabricator.api;
+import phabricator.common;
 import phabricator.tasks;
 import sample.common;
+import std.conv: to;
 import std.stdio;
-
-// Range offset
-private enum Offset = 50;
 
 // main entry
 void main(string[] args)
 {
     auto settings = getSettings(args);
-    int current = 1;
-    while (current < 2200)
+    int count = 0;
+    auto api = construct!ManiphestAPI(settings);
+    foreach (task; api.all()[ResultKey][DataKey].array)
     {
-        foreach (restrict; restricted(settings, current, Offset))
-        {
-            writeln("unable to find information about " ~ restrict);
-        }
-
-        current = current + Offset;
+        count++;
     }
+
+    foreach (restrict; restricted(settings, 1, 2200))
+    {
+        writeln("unable to find information about " ~ restrict);
+    }
+
+    writeln("task count: " ~ to!string(count));
 }

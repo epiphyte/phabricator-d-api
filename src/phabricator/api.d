@@ -17,7 +17,7 @@ import std.uri;
 private enum ErrorCode = "error_code";
 
 // Posting code prefix for mixin
-private enum PostPrefix = "val = cast(string)post(endpoint, re.";
+private enum PostPrefix = "val = cast(string)post(endpoint, ";
 
 // Posting code suffix for mixin
 private enum PostSuffix = ", client);";
@@ -26,7 +26,7 @@ private enum PostSuffix = ", client);";
 private enum PostEncoded = PostPrefix ~ "encoded" ~ PostSuffix;
 
 // Mapped values from request data
-private enum PostMapped = PostPrefix ~ "data" ~ PostSuffix;
+private enum PostMapped = PostPrefix ~ "mapped" ~ PostSuffix;
 
 /**
  * Generalized exceptions
@@ -694,6 +694,9 @@ public abstract class PhabricatorAPI
                 throw new PhabricatorAPIException("URL encoded but no values");
             }
         }
+
+        // Settings that are temporal to request and not initial data requests
+        string[string] temporal;
     }
 
 ///
@@ -762,13 +765,13 @@ version(PhabUnitTest)
         bool more = true;
         JSONValue[] results;
         string afterValue = null;
-        req.data["order"] = "newest";
         while (more)
         {
+            req.temporal["order"] = "newest";
             more = false;
             if (afterValue !is null)
             {
-                req.data[AfterKey] = afterValue;
+                req.temporal[AfterKey] = afterValue;
             }
 
             auto current = this.request(method, cat, call, req);
@@ -853,17 +856,38 @@ version(PhabUnitTest)
 
             if (curl)
             {
-                string[string] mapped;
-                string encoded;
+                auto tokens = re.temporal;
+                tokens["api.token"] = this.token;
                 if (re.urlEncode)
                 {
-                    re.encoded ~= "&api.token=" ~ this.token;
+                    string encoded;
+                    foreach (token; tokens.byKey())
+                    {
+                        encoded = encoded ~ "&" ~ token ~ "=" ~ tokens[token];
+                    }
+
                     mixin(PostEncoded);
                 }
                 else
                 {
-                    re.data["api.token"] = this.token;
+                    string[string] mapped;
+                    foreach (key; re.data.byKey())
+                    {
+                        mapped[key] = re.data[key];
+                    }
+
+                    foreach (token; tokens.byKey())
+                    {
+                        mapped[token] = tokens[token];
+                    }
+
                     mixin(PostMapped);
+                }
+
+                // drop the temporal keys
+                foreach (key; re.temporal.keys)
+                {
+                    re.temporal.remove(key);
                 }
             }
 
