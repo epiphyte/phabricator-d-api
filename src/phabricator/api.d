@@ -860,7 +860,7 @@ version(PhabUnitTest)
                 tokens["api.token"] = this.token;
                 if (re.urlEncode)
                 {
-                    string encoded;
+                    string encoded = re.encoded;
                     foreach (token; tokens.byKey())
                     {
                         encoded = encoded ~ "&" ~ token ~ "=" ~ tokens[token];
