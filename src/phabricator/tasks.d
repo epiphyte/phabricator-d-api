@@ -6,6 +6,7 @@
 module phabricator.tasks;
 import phabricator.api;
 import phabricator.common;
+import std.algorithm: sort;
 import std.conv: to;
 import std.datetime;
 import std.json;
@@ -137,7 +138,7 @@ public static string[] restricted(Settings settings, int start, int page)
         }
 
         string[] results;
-        foreach (match; matched.byKey())
+        foreach (match; matched.keys.sort!())
         {
             if (!matched[match])
             {
