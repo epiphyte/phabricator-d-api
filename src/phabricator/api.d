@@ -567,10 +567,15 @@ public class PasteAPI : PhabricatorAPI
     /**
      * Get an active paste by phid
      */
-    public JSONValue activeByPHID(string phid)
+    public JSONValue activeByPHID(string phid, bool withContent = true)
     {
         auto req = this.fromKey("active");
         req.data["constraints[phids][0]"] = phid;
+        if (withContent)
+        {
+            req.data["attachments[content]"] = "1";
+        }
+
         return this.request(HTTP.Method.post,
                             Category.paste,
                             "search",
