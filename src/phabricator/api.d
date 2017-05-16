@@ -140,6 +140,19 @@ public class DashboardAPI : PhabricatorAPI
 public class ProjectAPI : PhabricatorAPI
 {
     /**
+     * Add a member to a project
+     */
+    public JSONValue addMember(string projectPHID, string userPHID)
+    {
+        auto req = this.buildTrans(projectPHID,
+                                   [tuple("members.add", userPHID, true)]);
+        return this.request(HTTP.Method.post,
+                            Category.project,
+                            "edit",
+                            &req);
+    }
+
+    /**
      * Active projects
      */
     public JSONValue active()
