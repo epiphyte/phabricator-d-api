@@ -157,8 +157,32 @@ public class ProjectAPI : PhabricatorAPI
      */
     public JSONValue active()
     {
+        return this.activeRequest();
+    }
+
+    /**
+     * Active projects with membership
+     */
+    public JSONValue membersActive()
+    {
+        return this.activeRequest(["members"]);
+    }
+
+    /**
+     * Get active projects with attachments
+     */
+    private JSONValue activeRequest(string[] attachments = null)
+    {
         // NOTE: needs to eventually support paging
         auto req = this.fromKey("active");
+        if (attachments !is null)
+        {
+            foreach (attachment; attachments)
+            {
+                req.data[format("attachments[%s]", attachment)] = "1";
+            }
+        }
+
         return this.request(HTTP.Method.post,
                             Category.project,
                             "search",
