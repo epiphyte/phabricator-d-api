@@ -7,6 +7,9 @@ module phabricator.projects;
 import phabricator.api;
 import phabricator.common;
 
+/**
+ * Assign a user to all active projects
+ */
 public static bool assignToActive(Settings settings, string userPHID)
 {
     try
@@ -24,6 +27,7 @@ public static bool assignToActive(Settings settings, string userPHID)
                 // Ignore phabricator API exceptions
             }
         }
+
         return true;
     }
     catch (Exception e)
