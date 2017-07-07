@@ -303,7 +303,7 @@ public class ManiphestAPI : PhabricatorAPI
      */
     public JSONValue addProject(string phid, string projectPHID)
     {
-        return this.edit(phid, [tuple("projects.add", projectPHID, true)]);;
+        return this.edit(phid, [tuple("projects.add", projectPHID, true)]);
     }
 
     /**
