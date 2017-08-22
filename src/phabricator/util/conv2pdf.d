@@ -6,6 +6,7 @@
 module phabricator.util.conv2pdf;
 import phabricator.api;
 import phabricator.common;
+import phabricator.util.diffusion;
 import std.file: write;
 import std.process: execute;
 import std.stdio: writeln;

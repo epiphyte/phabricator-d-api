@@ -6,6 +6,7 @@
 module phabricator.util.conv2wiki;
 import phabricator.api;
 import phabricator.common;
+import phabricator.util.diffusion;
 import std.algorithm: sort;
 import std.csv;
 import std.stdio: writeln;
