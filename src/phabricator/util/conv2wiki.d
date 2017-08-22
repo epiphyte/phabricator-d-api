@@ -3,7 +3,7 @@
  * MIT License
  * Convert objects to a wiki page
  */
-module phabricator.conv2wiki;
+module phabricator.util.conv2wiki;
 import phabricator.api;
 import phabricator.common;
 import std.algorithm: sort;

@@ -4,7 +4,7 @@
  * Repo (CSV) to wiki converter
  */
 import phabricator.common;
-import phabricator.conv2wiki;
+import phabricator.util.conv2wiki;
 import std.getopt;
 import std.stdio;
 

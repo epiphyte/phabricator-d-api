@@ -3,7 +3,7 @@
  * MIT License
  * Task helpers
  */
-module phabricator.tasks;
+module phabricator.util.tasks;
 import phabricator.api;
 import phabricator.common;
 import std.algorithm: sort;

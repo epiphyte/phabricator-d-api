@@ -5,7 +5,7 @@
  */
 import phabricator.api;
 import phabricator.common;
-import phabricator.tasks;
+import phabricator.util.tasks;
 import sample.common;
 import std.conv: to;
 import std.stdio;

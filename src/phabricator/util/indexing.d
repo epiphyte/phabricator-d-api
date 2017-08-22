@@ -3,7 +3,7 @@
  * MIT License
  * Indexing (custom field) operations
  */
-module phabricator.indexing;
+module phabricator.util.indexing;
 import phabricator.api;
 import phabricator.common;
 import std.json;

@@ -3,7 +3,7 @@
  * MIT License
  * Supports converting phabricator objects to pdf
  */
-module phabricator.conv2pdf;
+module phabricator.util.conv2pdf;
 import phabricator.api;
 import phabricator.common;
 import std.file: write;

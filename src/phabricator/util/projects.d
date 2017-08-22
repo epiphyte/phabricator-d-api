@@ -3,7 +3,7 @@
  * MIT License
  * Project util helpers
  */
-module phabricator.projects;
+module phabricator.util.projects;
 import phabricator.api;
 import phabricator.common;
 

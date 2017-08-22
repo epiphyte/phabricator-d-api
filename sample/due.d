@@ -3,7 +3,7 @@
  * MIT License
  * Tasking sample
  */
-import phabricator.tasks;
+import phabricator.util.tasks;
 import sample.common;
 import std.stdio;
 
