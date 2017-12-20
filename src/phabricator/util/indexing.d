@@ -10,13 +10,34 @@ import std.json;
 import std.stdio;
 
 /**
+ * An index item response from phabricator
+ */
+public class IndexItem
+{
+    // tasks
+    private string[] phids = [];
+
+    // add a new entry
+    public void add(string entry)
+    {
+        this.phids ~= entry;
+    }
+
+    // get tasks of this object
+    public string[] tasks()
+    {
+        return this.phids.dup;
+    }
+}
+
+/**
  * Get a list of all unique, sorted index values
  */
-public static int[string] getIndexValues(Settings settings)
+public static IndexItem[string] getIndexValues(Settings settings)
 {
     try
     {
-        int[string] objs;
+        IndexItem[string] objs;
         auto maniphest = construct!ManiphestAPI(settings);
         foreach (obj; maniphest.all()[ResultKey][DataKey].array)
         {
@@ -28,10 +49,10 @@ public static int[string] getIndexValues(Settings settings)
                 {
                     if (val.str !in objs)
                     {
-                        objs[val.str] = 0;
+                        objs[val.str] = new IndexItem();
                     }
 
-                    objs[val.str]++;
+                    objs[val.str].add(obj[PHID].str);
                 }
             }
         }
@@ -40,7 +61,7 @@ public static int[string] getIndexValues(Settings settings)
     }
     catch (Exception e)
     {
-        int[string] vals;
+        IndexItem[string] vals;
         writeln(e);
         return vals;
     }
