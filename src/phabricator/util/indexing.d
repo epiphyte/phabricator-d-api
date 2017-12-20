@@ -31,9 +31,32 @@ public class IndexItem
 }
 
 /**
+ * Get index values with counts only
+ */
+public static int[string] getIndexValues(Settings settings)
+{
+    try
+    {
+        int[string] objs;
+        auto indexing = getIndexItems(settings);
+        foreach (obj; indexing.keys())
+        {
+            objs[obj] = cast(int)indexing[obj].tasks.length;
+        }
+        return objs;
+    }
+    catch (Exception e)
+    {
+        int[string] vals;
+        writeln(e);
+        return vals;
+    }
+}
+
+/**
  * Get a list of all unique, sorted index values
  */
-public static IndexItem[string] getIndexValues(Settings settings)
+public static IndexItem[string] getIndexItems(Settings settings)
 {
     try
     {
