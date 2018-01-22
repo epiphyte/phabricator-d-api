@@ -14,7 +14,7 @@ import std.stdio;
  */
 public class IndexItem
 {
-    // tasks
+    // task phids
     private string[] phids = [];
 
     // add a new entry
@@ -43,6 +43,7 @@ public static int[string] getIndexValues(Settings settings)
         {
             objs[obj] = cast(int)indexing[obj].tasks.length;
         }
+
         return objs;
     }
     catch (Exception e)
