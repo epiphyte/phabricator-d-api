@@ -81,7 +81,10 @@ public static bool unmodified(Settings settings,
                     actual.add!"months"(months);
                     if (actual < now)
                     {
-                        maniphest.addProject(task[PHID].str, projectPHID);
+                        auto taskStr = task[PHID].str;
+                        maniphest.addProject(taskStr, projectPHID);
+                        maniphest.comment(taskStr,
+                                          "unassigned due to inactivity");
                     }
                 }
             }
