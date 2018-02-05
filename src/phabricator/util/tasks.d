@@ -84,7 +84,7 @@ public static bool unmodified(Settings settings,
                         auto taskStr = task[PHID].str;
                         maniphest.addProject(taskStr, projectPHID);
                         maniphest.comment(taskStr,
-                                          "unassigned due to inactivity");
+                                          "task updated due to inactivity");
                     }
                 }
             }
