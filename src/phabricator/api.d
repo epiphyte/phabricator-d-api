@@ -89,6 +89,7 @@ public class PhrictionAPI : PhabricatorAPI
     /**
      * Get page info
      */
+    deprecated("phriction.info is frozen")
     public JSONValue info(string slug)
     {
         auto req = DataRequest();
