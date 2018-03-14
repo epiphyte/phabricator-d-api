@@ -17,8 +17,8 @@ public static bool convertToDashboard(Settings settings,
     try
     {
         auto wiki = construct!PhrictionAPI(settings);
-        auto pageData = wiki.searchByPHID(phid)[ResultKey][DataKey];
-        auto page = pageData[AttachKey][ContentKey][ContentKey][RawKey].str;
+        auto pageData = wiki.searchByPHID(phid)[ResultKey][DataKey].array;
+        auto page = pageData[0][AttachKey][ContentKey][ContentKey][RawKey].str;
         auto dash = construct!DashboardAPI(settings);
         dash.editText(panel, page);
         return true;
