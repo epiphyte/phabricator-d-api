@@ -39,6 +39,9 @@ public enum StatusKey = "status";
 // PHID object identifiers
 public enum PHID = "phid";
 
+// Attachments key
+public enum AttachKey = "attachments";
+
 /**
  * Settings to construct apis from
  */
