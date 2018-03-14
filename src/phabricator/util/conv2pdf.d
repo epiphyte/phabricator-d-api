@@ -61,23 +61,3 @@ public static bool convertDiffusion(Settings settings,
         return false;
     }
 }
-
-/**
- * Convert a slug to a panel
- */
-public static bool convertPhriction(Settings settings,
-                                    string slug,
-                                    string output)
-{
-    try
-    {
-        auto wiki = construct!PhrictionAPI(settings);
-        auto page = wiki.info(slug)[ResultKey][ContentKey].str;
-        return convert(page, output);
-    }
-    catch (Exception e)
-    {
-        writeln(e);
-        return false;
-    }
-}

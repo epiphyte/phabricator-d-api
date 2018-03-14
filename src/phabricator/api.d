@@ -87,6 +87,18 @@ public class RemarkupAPI : PhabricatorAPI
 public class PhrictionAPI : PhabricatorAPI
 {
     /**
+     * Search by a phid to get content of a wiki page
+     */
+    public JSONValue searchByPHID(string phid, bool withContent = true)
+    {
+        auto req = this.activePHIDWithContent(phid, withContent);
+        return this.request(HTTP.Method.post,
+                            Category.phriction,
+                            "document.search",
+                            &req);
+    }
+
+    /**
      * Get page info
      */
     deprecated("phriction.info is frozen")
@@ -607,13 +619,7 @@ public class PasteAPI : PhabricatorAPI
      */
     public JSONValue activeByPHID(string phid, bool withContent = true)
     {
-        auto req = this.fromKey("active");
-        req.data["constraints[phids][0]"] = phid;
-        if (withContent)
-        {
-            req.data["attachments[content]"] = "1";
-        }
-
+        auto req = this.activePHIDWithContent(phid, withContent);
         return this.request(HTTP.Method.post,
                             Category.paste,
                             "search",
@@ -651,6 +657,20 @@ public abstract class PhabricatorAPI
     {
         auto req = DataRequest();
         req.data["queryKey"] = key;
+        return req;
+    }
+
+    /**
+     * Requests for active objects constrained to a phid WITH content
+     */
+    private DataRequest activePHIDWithContent(string phid, bool withContent)
+    {
+        auto req = this.fromKey("active");
+        req.data["constraints[phids][0]"] = phid;
+        if (withContent)
+        {
+            req.data["attachments[content]"] = "1";
+        }
         return req;
     }
 
