@@ -42,6 +42,9 @@ public enum PHID = "phid";
 // Attachments key
 public enum AttachKey = "attachments";
 
+// Raw key
+public enum RawKey = "raw";
+
 /**
  * Settings to construct apis from
  */
