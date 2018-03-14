@@ -1,7 +1,7 @@
 SRC=$(shell find src/ -name "*.d")
 OUTPUT=bin
 NAME=phabricator-d
-STYLE := $(shell command -v gstyle 2> /dev/null)
+SAMPLES=$(shell ls sample/ | grep -v "common.d" | sed "s/\.d//g")
 
 .PHONY: all
 
@@ -13,27 +13,20 @@ FLAGS := -inline\
 all: clean
 	dmd $(FLAGS) -c $(SRC) -of${OUTPUT}/${NAME}.so
 
-test: unittest style
+test: unittest 
 
 define do-sample
-	dmd $(FLAGS) $(SRC) sample/common.d sample/$1 -of$(OUTPUT)/$1
 endef
 
-samples: clean
-	$(call do-sample,tasks)
-	$(call do-sample,users)
-	$(call do-sample,due)
-	$(call do-sample,repo2wiki)
+samples: $(SAMPLES)
+
+$(SAMPLES): clean
+	dmd $(FLAGS) $(SRC) sample/common.d sample/$@.d -of$(OUTPUT)/$@
 
 unittest:
 	dmd $(SRC) "test/harness.d" -unittest -version=PhabUnitTest -of$(OUTPUT)/${NAME}
 	./$(OUTPUT)/$(NAME) > $(OUTPUT)/test.log
 	diff -u $(OUTPUT)/test.log test/expected.log
-
-style:
-ifdef STYLE
-	gstyle
-endif
 
 clean:
 	mkdir -p $(OUTPUT)
