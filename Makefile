@@ -15,9 +15,6 @@ all: clean
 
 test: unittest 
 
-define do-sample
-endef
-
 samples: $(SAMPLES)
 
 $(SAMPLES): clean
