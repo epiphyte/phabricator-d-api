@@ -27,9 +27,6 @@ private enum CustomField = "custom.custom:";
 // Index field
 public enum IndexField = CustomField ~ "index";
 
-// Due date field
-public enum DueDate = CustomField ~ "duedate";
-
 // fields key
 public enum FieldsKey = "fields";
 
