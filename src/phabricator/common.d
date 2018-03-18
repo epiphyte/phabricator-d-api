@@ -71,17 +71,17 @@ public static T construct(T : PhabricatorAPI)(Settings settings)
 /**
  * Load environment variables
  */
-public static string[string] loadEnvironmentFiles(string envFile, string filter)
+public static string[string] loadEnvironmentFile(string envFile, string filter)
 {
     string[string] vars;
-    loadEnvironmentFiles(vars, envFile, filter);
+    loadEnvironmentFile(vars, envFile, filter);
     return vars;
 }
 
 /**
  * Load into an existing associative array
  */
-public static void loadEnvironmentFiles(string[string] vars, string envFile, string filter)
+public static void loadEnvironmentFile(string[string] vars, string envFile, string filter)
 {
     if (exists(envFile))
     {
