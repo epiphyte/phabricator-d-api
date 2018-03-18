@@ -1,10 +1,12 @@
 /**
- * Copyright 2017
+ * Copyright 2018
  * MIT License
  * Common operations
  */
 module phabricator.common;
 import phabricator.api;
+import std.file: exists, readText;
+import std.string: endsWith, indexOf, split, startsWith;
 
 // Result key
 public enum ResultKey = "result";
@@ -64,4 +66,50 @@ public static T construct(T : PhabricatorAPI)(Settings settings)
     api.url = settings.url;
     api.token = settings.token;
     return api;
+}
+
+/**
+ * Load environment variables
+ */
+public static string[string] loadEnvironmentFiles(string envFile, string filter)
+{
+    string[string] vars;
+    if (exists(envFile))
+    {
+        auto useFilter = filter;
+        if (useFilter == null)
+        {
+            useFilter = "";
+        }
+        auto text = readText(envFile);
+        foreach (string line; text.split("\n"))
+        {
+            loadSetting(vars, line, filter);
+        }
+    }
+
+    return vars;
+}
+
+/**
+ * Load settings
+ */
+private static void loadSetting(string[string] vars, string line, string filter)
+{
+    if (line.startsWith(filter))
+    {
+        auto segment = line[filter.length..line.length];
+        auto idx = segment.indexOf("=");
+        if (idx > 0)
+        {
+            auto key = segment[0..idx];
+            auto val = segment[idx + 1..segment.length];
+            if (val.startsWith("\"") && val.endsWith("\""))
+            {
+                val = val[1..val.length - 1];
+            }
+
+            vars[key] = val;
+        }
+    }
 }
