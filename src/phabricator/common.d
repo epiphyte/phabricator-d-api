@@ -74,6 +74,15 @@ public static T construct(T : PhabricatorAPI)(Settings settings)
 public static string[string] loadEnvironmentFiles(string envFile, string filter)
 {
     string[string] vars;
+    loadEnvironmentFiles(vars, envFile, filter);
+    return vars;
+}
+
+/**
+ * Load into an existing associative array
+ */
+public static void loadEnvironmentFiles(string[string] vars, string envFile, string filter)
+{
     if (exists(envFile))
     {
         auto useFilter = filter;
@@ -87,8 +96,6 @@ public static string[string] loadEnvironmentFiles(string envFile, string filter)
             loadSetting(vars, line, filter);
         }
     }
-
-    return vars;
 }
 
 /**
