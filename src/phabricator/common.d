@@ -101,7 +101,7 @@ public static void loadEnvironmentFile(string[string] vars, string envFile, stri
 /**
  * Load settings
  */
-private static void loadSetting(string[string] vars, string line, string filter)
+public static void loadSetting(string[string] vars, string line, string filter)
 {
     if (line.startsWith(filter))
     {
