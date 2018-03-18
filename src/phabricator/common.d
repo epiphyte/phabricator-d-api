@@ -85,11 +85,6 @@ public static void loadEnvironmentFile(string[string] vars, string envFile, stri
 {
     if (exists(envFile))
     {
-        auto useFilter = filter;
-        if (useFilter == null)
-        {
-            useFilter = "";
-        }
         auto text = readText(envFile);
         foreach (string line; text.split("\n"))
         {
@@ -101,8 +96,14 @@ public static void loadEnvironmentFile(string[string] vars, string envFile, stri
 /**
  * Load settings
  */
-public static void loadSetting(string[string] vars, string line, string filter)
+public static void loadSetting(string[string] vars, string line, string varFilter)
 {
+    auto filter = varFilter;
+    if (filter == null)
+    {
+        filter = "";
+    }
+
     if (line.startsWith(filter))
     {
         auto segment = line[filter.length..line.length];
