@@ -74,6 +74,7 @@ public static T construct(T : PhabricatorAPI)(Settings settings)
 public static string[string] loadEnvironmentFile(string envFile, string filter)
 {
     string[string] vars;
+    vars["env"] = envFile;
     loadEnvironmentFile(vars, envFile, filter);
     return vars;
 }
@@ -83,6 +84,11 @@ public static string[string] loadEnvironmentFile(string envFile, string filter)
  */
 public static void loadEnvironmentFile(string[string] vars, string envFile, string filter)
 {
+    if (vars == null)
+    {
+        throw new Exception("map is null, aborting");
+    }
+
     if (exists(envFile))
     {
         auto text = readText(envFile);
@@ -116,7 +122,6 @@ public static void loadSetting(string[string] vars, string line, string varFilte
             {
                 val = val[1..val.length - 1];
             }
-
             vars[key] = val;
         }
     }
