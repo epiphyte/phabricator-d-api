@@ -248,34 +248,46 @@ public static bool wikiDiffusion(Settings settings,
 {
     try
     {
-        if (!path.endsWith(".csv"))
-        {
-            throw new PhabricatorAPIException("only csv files are supported");
-        }
-
-        string[] vals;
-        auto rawText = getDiffusion(settings, path, callsign, branch);
-        switch (method)
-        {
-            case Conv.catsub:
-                vals = catSubCat(rawText);
-                break;
-            case Conv.nameAlias:
-                vals = table!NameAliasAlsoTable(rawText);
-                break;
-            default:
-                vals = rawText.split("\n");
-                break;
-        }
-
-        auto text = join(vals, "\n");
+        auto text = wikiDiffusion(settings, path, callsign, branch, method);
         auto phriction = construct!PhrictionAPI(settings);
         phriction.edit(slug, title, header ~ text);
         return true;
     }
     catch (Exception e)
     {
-        writeln(e);
         return false;
     }
+}
+
+/**
+ * Get diffusion converted to wiki text
+ */
+public static string wikiDiffusion(Settings settings,
+                                   string path,
+                                   string callsign,
+                                   string branch,
+                                   Conv method)
+{
+    if (!path.endsWith(".csv"))
+    {
+        throw new PhabricatorAPIException("only csv files are supported");
+    }
+
+    string[] vals;
+    auto rawText = getDiffusion(settings, path, callsign, branch);
+    switch (method)
+    {
+        case Conv.catsub:
+            vals = catSubCat(rawText);
+            break;
+        case Conv.nameAlias:
+            vals = table!NameAliasAlsoTable(rawText);
+            break;
+        default:
+            vals = rawText.split("\n");
+            break;
+    }
+
+    auto text = join(vals, "\n");
+    return text;
 }
