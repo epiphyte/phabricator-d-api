@@ -1,7 +1,6 @@
 SRC=$(shell find src/ -name "*.d")
 OUTPUT=bin
 NAME=phabricator-d
-SAMPLES=$(shell ls sample/ | grep -v "common.d" | sed "s/\.d//g")
 
 .PHONY: all
 
@@ -14,11 +13,6 @@ all: clean
 	dmd $(FLAGS) -c $(SRC) -of${OUTPUT}/${NAME}.so
 
 test: unittest 
-
-samples: $(SAMPLES)
-
-$(SAMPLES): clean
-	dmd $(FLAGS) $(SRC) sample/common.d sample/$@.d -of$(OUTPUT)/$@
 
 unittest:
 	dmd $(SRC) "test/harness.d" -unittest -version=PhabUnitTest -of$(OUTPUT)/${NAME}

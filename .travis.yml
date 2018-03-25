@@ -2,7 +2,6 @@ language: d
 
 script:
     - make
-    - make samples
     - make test
 
 notifications:
