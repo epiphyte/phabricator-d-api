@@ -554,7 +554,26 @@ public enum Category : string
         diffusion = "diffusion", file = "file",
         maniphest = "maniphest", user = "user",
         project = "project", remarkup = "remarkup",
-        paste = "paste"
+        paste = "paste", feed = "feed"
+}
+
+/**
+ * Feed API
+ */
+public class FeedAPI : PhabricatorAPI
+{
+    /**
+     * Get a specified feed
+     */
+    public JSONValue getFeed(string phid)
+    {
+        auto req = DataRequest();
+        req.data["filterPHIDs[0]"] = phid;
+        return this.request(HTTP.Method.post,
+                            Category.feed,
+                            "query",
+                            &req);
+    }
 }
 
 /**
