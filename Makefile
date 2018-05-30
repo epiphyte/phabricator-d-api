@@ -1,21 +1,18 @@
-SRC=$(shell find src/ -name "*.d")
-OUTPUT=bin
-NAME=phabricator-d
-
-.PHONY: all
-
-FLAGS := -inline\
-	-release\
-	-O\
-	-boundscheck=off\
+SRC    := $(shell find src/ -name "*.d")
+OUTPUT := bin
+NAME   := phabricator-d
+FLAGS  := -inline -release -O -boundscheck=off
+OUTDIR := -of$(OUTPUT)/$(NAME)
+DMD    := dmd
+TESTS  := "test/harness.d" -unittest -version=PhabUnitTest 
 
 all: clean
-	dmd $(FLAGS) -c $(SRC) -of${OUTPUT}/${NAME}.so
+	$(DMD) $(FLAGS) -c $(SRC) $(OUTDIR).so
 
 test: unittest 
 
 unittest:
-	dmd $(SRC) "test/harness.d" -unittest -version=PhabUnitTest -of$(OUTPUT)/${NAME}
+	$(DMD) $(SRC) $(TESTS) $(OUTDIR)
 	./$(OUTPUT)/$(NAME) > $(OUTPUT)/test.log
 	diff -u $(OUTPUT)/test.log test/expected.log
 
